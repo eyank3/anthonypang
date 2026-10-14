@@ -1355,7 +1355,7 @@
 .ag-panel:focus-visible {
   box-shadow: 0 0 0 2px var(--ag-accent), 0 10px 30px -18px rgba(0,0,0,.8);
 }
-.ag-panel__frame { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; }
+.ag-panel__frame { position: absolute; inset: 0; overflow: hidden; border-radius: inherit; background: var(--ag-image-bg, transparent); }
 .ag-panel__media {
   --ag-gray: 1;
   --ag-dim: 0.35;
@@ -1368,7 +1368,8 @@
 }
 .ag-panel__media img {
   width: 100%; height: 100%;
-  object-fit: cover;
+  object-fit: var(--ag-image-fit, cover);
+  padding: var(--ag-image-padding, 0);
   display: block;
   user-select: none;
   -webkit-user-drag: none;
@@ -2492,6 +2493,31 @@ window.projectGames = [
     url: 'https://eyank3.github.io/tankfight/',
     tiltMax: 8,
   },
+  {
+    title: 'WordWorld · 单词学习',
+    subtitle: 'WordWorld',
+    emoji: '📚',
+    desc: '面向英语考试词汇的学习网页，支持新词学习、间隔复习、生词收藏与多种主动回忆练习。',
+    tags: ['词汇学习', '间隔复习', '主动回忆', '生词本'],
+    status: 'ONLINE',
+    cover: 'covers/wordworld-cover.webp',
+    url: 'https://eyank3.github.io/wordworld/',
+    tiltMax: 8,
+  },
+  {
+    title: '奶龙跳一跳',
+    subtitle: 'Nailong Jump',
+    emoji: '🦖',
+    desc: '按住蓄力、松开跳跃，控制奶龙向前跳；支持手机触屏、鼠标与空格键操作。',
+    tags: ['蓄力跳跃', '手机触屏', '键盘操作', '最高分'],
+    status: 'ONLINE',
+    cover: 'covers/nailong-jump-cover.webp',
+    coverFit: 'contain',
+    coverPadding: 'clamp(8px, 2vw, 20px) clamp(8px, 2vw, 20px) clamp(30px, 5vw, 62px)',
+    coverBackground: 'radial-gradient(ellipse at 50% 38%, #32666a, #10262f 75%)',
+    url: 'https://eyank3.github.io/nailong/',
+    tiltMax: 8,
+  },
 ];
 
 function renderGames() {
@@ -3003,7 +3029,7 @@ function initAccordionGallery(container, items, opts) {
       '<span class="ag-panel__text">' + (item.label || '') + '</span>' +
       '</span>' : '';
     return '<div class="ag-panel' + (isActive ? ' ag-panel--active' : '') + '"' +
-      ' style="border-radius:' + settings.radius + 'px"' +
+      ' style="border-radius:' + settings.radius + 'px;--ag-image-fit:' + (item.imageFit || 'cover') + ';--ag-image-padding:' + (item.imagePadding || '0') + ';--ag-image-bg:' + (item.imageBackground || 'transparent') + '"' +
       (item.link ? ' data-link="' + item.link + '"' : '') +
       ' role="listitem" tabindex="0" aria-current="' + (isActive ? 'true' : 'false') + '"' +
       ' aria-label="' + (item.label || '') + '"' +
@@ -3024,6 +3050,13 @@ function initAccordionGallery(container, items, opts) {
 
   function applyLayout(animate) {
     if (!panelRefs.length) return;
+    if (container.getAttribute('data-ag-mobile') === 'grid') {
+      panelRefs.forEach(function(panel, i) {
+        panel.classList.toggle('ag-panel--active', i === active);
+        panel.setAttribute('aria-current', i === active ? 'true' : 'false');
+      });
+      return;
+    }
     var r = Math.min(Math.max(settings.expandRatio, 0.2), 0.9);
     var grow = count > 1 ? (r * (count - 1)) / (1 - r) : 1;
     var mediaSize = mediaSizeVal;
@@ -3482,7 +3515,7 @@ function renderGameAccordion() {
   if (!container) return;
   var games = window.projectGames || [];
   var items = games.map(function(g) {
-    return { image: g.cover, label: g.title, link: g.url, alt: g.title + ' 封面' };
+    return { image: g.cover, label: g.title, link: g.url, alt: g.title + ' 封面', imageFit: g.coverFit, imagePadding: g.coverPadding, imageBackground: g.coverBackground };
   });
   initAccordionGallery(container, items, {
     height: 420,
@@ -3491,6 +3524,7 @@ function renderGameAccordion() {
     trigger: 'hover',
     accentColor: '#a78bfa',
     grayscale: false,
+    mobileMode: 'grid',
   });
 }
 
